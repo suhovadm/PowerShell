@@ -10,6 +10,8 @@ $PSVersionTable.PSVersion
 
 $host.Version
 
+-----------------------------------------------------
+
 Способ #3, покажет вывод в более привычном виде:
 
 Get-Host | Select-Object Version
