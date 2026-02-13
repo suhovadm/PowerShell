@@ -1,51 +1,51 @@
-# Получаем всех локальных пользователей
+# РџРѕР»СѓС‡Р°РµРј РІСЃРµС… Р»РѕРєР°Р»СЊРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№.
 $users = Get-LocalUser
 
-# Получаем SID встроенной группы Administrators (S-1-5-32-544)
+# РџРѕР»СѓС‡Р°РµРј SID РІСЃС‚СЂРѕРµРЅРЅРѕР№ РіСЂСѓРїРїС‹ Administrators (S-1-5-32-544)
 $adminGroupSID = "S-1-5-32-544"
 
-# Получаем участников группы администраторов ОДИН раз
+# РџРѕР»СѓС‡Р°РµРј СѓС‡Р°СЃС‚РЅРёРєРѕРІ РіСЂСѓРїРїС‹ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ РћР”РРќ СЂР°Р· (СЌС‚Рѕ РЅСѓР¶РЅРѕ РґР»СЏ СѓСЃРєРѕСЂРµРЅРёСЏ СЂР°Р±РѕС‚С‹ СЃРєСЂРёРїС‚Р°).
 $adminMembers = Get-LocalGroupMember -SID $adminGroupSID -ErrorAction SilentlyContinue |
                 Select-Object -ExpandProperty SID
 
 $result = foreach ($user in $users) {
 
-    # Проверяем по SID, входит ли пользователь в Administrators
+    # РџСЂРѕРІРµСЂСЏРµРј РїРѕ SID, РІС…РѕРґРёС‚ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РІ РіСЂСѓРїРїСѓ Administrators.
     $isAdmin = $adminMembers -contains $user.SID
 
     if ($isAdmin) {
         $groups = "Administrators"
-        $role = "Администратор"
+        $role = "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ"
     } else {
         $groups = ""
-        $role = "Обычный пользователь"
+        $role = "РћР±С‹С‡РЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ"
     }
 
-    # Понятные статусы пароля
+    # Р’С‹РІРѕРґРёРј РїРѕРЅСЏС‚РЅС‹Рµ СЃС‚Р°С‚СѓСЃС‹ РїР°СЂРѕР»СЏ, 3 С€С‚.
     if (-not $user.PasswordRequired) {
-        $passwordInfo = "Не установлен"
+        $passwordInfo = "РќРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ"
     }
     elseif ($user.PasswordNeverExpires) {
-        $passwordInfo = "Установлен и не истекает"
+        $passwordInfo = "РЈСЃС‚Р°РЅРѕРІР»РµРЅ Рё РЅРµ РёСЃС‚РµРєР°РµС‚"
     }
     else {
-        $passwordInfo = "Установлен и истекает"
+        $passwordInfo = "РЈСЃС‚Р°РЅРѕРІР»РµРЅ Рё РёСЃС‚РµРєР°РµС‚"
     }
 
     [PSCustomObject]@{
-        Пользователь     = $user.Name
-        Включён          = $user.Enabled
-        "Последний вход" = $user.LastLogon
-        Пароль           = $passwordInfo
-        Группы           = $groups
-        Права            = $role
+        РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ     = $user.Name
+        Р’РєР»СЋС‡С‘РЅ          = $user.Enabled
+        "РџРѕСЃР»РµРґРЅРёР№ РІС…РѕРґ" = $user.LastLogon
+        РџР°СЂРѕР»СЊ           = $passwordInfo
+        Р“СЂСѓРїРїС‹           = $groups
+        РџСЂР°РІР°            = $role
     }
 }
 
-# Цветной вывод таблицы, не меняя структуру
+# Р¦РІРµС‚РЅРѕР№ РІС‹РІРѕРґ С‚Р°Р±Р»РёС†С‹, РІ РЅР°С€РµРј СЃР»СѓС‡Р°Рµ С‚РѕР»СЊРєРѕ Р·РµР»С‘РЅС‹Р№ С†РІРµС‚ РґР»СЏ Р°РґРјРёРЅРѕРІ.
 $columns = $result | Format-Table -AutoSize | Out-String -Width 4096
 foreach ($line in $columns -split "`n") {
-    if ($line -match "Администратор") {
+    if ($line -match "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ") {
         Write-Host $line -ForegroundColor Green
     } else {
         Write-Host $line
