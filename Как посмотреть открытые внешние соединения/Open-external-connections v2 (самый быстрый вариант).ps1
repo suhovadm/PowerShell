@@ -1,36 +1,36 @@
-# Включаем UTF-8.
+# Р’РєР»СЋС‡Р°РµРј UTF-8.
 chcp 65001 > $null
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Получаем список процессов один раз (быстрее чем Get-Process в цикле).
+# РџРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє РїСЂРѕС†РµСЃСЃРѕРІ РѕРґРёРЅ СЂР°Р· (Р±С‹СЃС‚СЂРµРµ С‡РµРј Get-Process РІ С†РёРєР»Рµ).
 $processMap = @{ }
 Get-Process | ForEach-Object {
     $processMap[$_.Id] = $_.ProcessName
 }
 
-# Получаем Established соединения.
+# РџРѕР»СѓС‡Р°РµРј Established СЃРѕРµРґРёРЅРµРЅРёСЏ.
 $connections = Get-NetTCPConnection -State Established
 
-# Быстро формируем объекты.
+# Р‘С‹СЃС‚СЂРѕ С„РѕСЂРјРёСЂСѓРµРј РѕР±СЉРµРєС‚С‹.
 $result = foreach ($conn in $connections) {
 
-    # Берём имя процесса из карты, если нет — получаем напрямую.
+    # Р‘РµСЂС‘Рј РёРјСЏ РїСЂРѕС†РµСЃСЃР° РёР· РєР°СЂС‚С‹, РµСЃР»Рё РЅРµС‚ вЂ” РїРѕР»СѓС‡Р°РµРј РЅР°РїСЂСЏРјСѓСЋ.
     $processName = if ($processMap[$conn.OwningProcess]) {
         $processMap[$conn.OwningProcess]
     } else {
         (Get-Process -Id $conn.OwningProcess -ErrorAction SilentlyContinue).ProcessName
     }
 
-    # Подсказка - какие сервисы на каких портах висят.
+    # РџРѕРґСЃРєР°Р·РєР° - РєР°РєРёРµ СЃРµСЂРІРёСЃС‹ РЅР° РєР°РєРёС… РїРѕСЂС‚Р°С… РІРёСЃСЏС‚.
     $hint = switch ($conn.LocalPort) {
-        1080  {"SOCKS5 прокси (V2Ray / Xray / Shadowsocks / Clash / SSH -D)"}
-        8388  {"Shadowsocks сервер"}
+        1080  {"SOCKS5 РїСЂРѕРєСЃРё (V2Ray / Xray / Shadowsocks / Clash / SSH -D)"}
+        8388  {"Shadowsocks СЃРµСЂРІРµСЂ"}
         7890  {"Clash HTTP proxy"}
         7891  {"Clash SOCKS proxy"}
-        443   {"HTTPS (VPN / прокси поверх TLS)"}
+        443   {"HTTPS (VPN / РїСЂРѕРєСЃРё РїРѕРІРµСЂС… TLS)"}
         1194  {"OpenVPN"}
         51820 {"WireGuard"}
-        default {"Обычное TCP соединение"}
+        default {"РћР±С‹С‡РЅРѕРµ TCP СЃРѕРµРґРёРЅРµРЅРёРµ"}
     }
 
     [PSCustomObject]@{
@@ -43,13 +43,13 @@ $result = foreach ($conn in $connections) {
     }
 }
 
-# Группировка и вывод.
-# Жёлтый - это подсветка надписи "Узел: такой-то".
-# Тёмно-серый - это строчки типа "равно" над и под выводом узла.
+# Р“СЂСѓРїРїРёСЂРѕРІРєР° Рё РІС‹РІРѕРґ.
+# Р–С‘Р»С‚С‹Р№ - СЌС‚Рѕ РїРѕРґСЃРІРµС‚РєР° РЅР°РґРїРёСЃРё "РЈР·РµР»: С‚Р°РєРѕР№-С‚Рѕ".
+# РўС‘РјРЅРѕ-СЃРµСЂС‹Р№ - СЌС‚Рѕ СЃС‚СЂРѕС‡РєРё С‚РёРїР° "СЂР°РІРЅРѕ" РЅР°Рґ Рё РїРѕРґ РІС‹РІРѕРґРѕРј СѓР·Р»Р°.
 $result | Group-Object LocalAddress | ForEach-Object {
 
     Write-Host "`n==============================" -ForegroundColor DarkGray
-    Write-Host "Узел: $($_.Name)" -ForegroundColor Yellow
+    Write-Host "РЈР·РµР»: $($_.Name)" -ForegroundColor Yellow
     Write-Host "==============================" -ForegroundColor DarkGray
 
     $_.Group | Format-Table -AutoSize
