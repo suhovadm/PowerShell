@@ -46,7 +46,7 @@
 Ошибка: "Значение бы ло недопустимо малым или недопустимо большим для Int64."  
 строка:47 знак:9  
 + $intBinary = [Convert]::ToString([long]$integerPart, 2)  
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
 + CategoryInfo : InvalidArgument: (:) [], RuntimeException  
 + FullyQualifiedErrorId : InvalidCastIConvertible  
 
