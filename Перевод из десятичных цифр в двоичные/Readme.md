@@ -57,5 +57,5 @@
 
 Как пользоваться?  
 Запускаем обычный PowerShell, или PowerShell ISE от админа, кидаем туда скрипт и работаем.  
-Обе версии работают начиная с PowerShell 3.0 / Windows 8.  
+Обе версии работают начиная с PowerShell 3.0 / Windows 8 / Windows Server 2012.
 Обе совместимы с PowerShell 7.  
