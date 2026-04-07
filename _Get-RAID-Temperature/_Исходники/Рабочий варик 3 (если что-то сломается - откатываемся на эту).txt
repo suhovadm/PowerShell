@@ -1,0 +1,140 @@
+# Иконка в трее. Показывает температуру!
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+# Путь, откуда цепляется утилита для управления RAID-контроллером - storcli64.exe
+$StorCliPath = "C:\storcli64.exe"
+
+# Функция получения температуры через PowerShell из cmd-шки.
+function Get-RAIDTemperature {
+    try {
+        $output = & cmd.exe /c "$StorCliPath /c0 show all | findstr /i temp" 2>$null
+        if ($output) {
+            $tempValue = [regex]::Match($output, '\d+').Value
+            if ($tempValue) { return $tempValue }
+        }
+        return $null
+    }
+    catch { return $null }
+}
+
+# Функция создания иконки с текстом температуры.
+function Create-TemperatureIcon {
+    param([string]$tempText)
+    
+    # Создаем изображение 16x16 с прозрачным фоном.
+    $bmp = New-Object System.Drawing.Bitmap(16, 16)
+    $bmp.MakeTransparent()
+    $graphics = [System.Drawing.Graphics]::FromImage($bmp)
+    
+    # Прозрачный фон (без белого цвета и рамки).
+    $graphics.Clear([System.Drawing.Color]::Transparent)
+    
+    # Выбираем цвет текста в зависимости от температуры.
+    if ($tempText -match '\d+') {
+        $tempNum = [int]$matches[0]
+        if ($tempNum -ge 80) { 
+            $textColor = [System.Drawing.Color]::Red # Больше 80 градусов Цельсия - красный.
+        } elseif ($tempNum -ge 70) { 
+            $textColor = [System.Drawing.Color]::Orange # Больше 70 градусов Цельсия - оранж.
+        } else { 
+            $textColor = [System.Drawing.Color]::White # По дефолту - белый.
+        }
+    } else {
+        $textColor = [System.Drawing.Color]::Gray # Если какая-то ошибка или отсутствие данных - серый.
+    }
+    
+    # Максимально возможный размер шрифта для 16x16 - Arial, 12, жирный.
+    $font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
+    $brush = New-Object System.Drawing.SolidBrush($textColor)
+    
+    # Центрируем текст.
+    $stringFormat = New-Object System.Drawing.StringFormat
+    $stringFormat.Alignment = [System.Drawing.StringAlignment]::Center
+    $stringFormat.LineAlignment = [System.Drawing.StringAlignment]::Center
+    
+    $graphics.DrawString($tempText, $font, $brush, 8, 8, $stringFormat)
+    
+    # Освобождаем ресурсы.
+    $font.Dispose()
+    $brush.Dispose()
+    $stringFormat.Dispose()
+    $graphics.Dispose()
+    
+    # Конвертируем в иконку.
+    $handle = $bmp.GetHicon()
+    $icon = [System.Drawing.Icon]::FromHandle($handle)
+    $bmp.Dispose()
+    
+    return $icon
+}
+
+# Создаем иконку в трее.
+$icon = New-Object System.Windows.Forms.NotifyIcon
+$icon.Visible = $true
+$icon.Text = "RAID Controller Temperature"
+
+# Меню при правом клике.
+
+# Выход.
+$menu = New-Object System.Windows.Forms.ContextMenuStrip
+$exitMenuItem = New-Object System.Windows.Forms.ToolStripMenuItem
+$exitMenuItem.Text = "Выход"
+$exitMenuItem.Add_Click({ 
+    $icon.Visible = $false
+    $icon.Dispose()
+    [System.Windows.Forms.Application]::Exit()
+})
+$menu.Items.Add($exitMenuItem)
+
+# Обновить.
+$refreshMenuItem = New-Object System.Windows.Forms.ToolStripMenuItem
+$refreshMenuItem.Text = "Обновить сейчас"
+$refreshMenuItem.Add_Click({
+    $temp = Get-RAIDTemperature
+    if ($temp) {
+        $newIcon = Create-TemperatureIcon -tempText "$temp"
+        $icon.Icon = $newIcon
+        $icon.Text = "RAID Controller: $temp°C"
+    }
+})
+$menu.Items.Add($refreshMenuItem)
+
+$icon.ContextMenuStrip = $menu
+
+# Таймер обновления иконки.
+$timer = New-Object System.Windows.Forms.Timer
+$timer.Interval = 30000  # Обновляем температуру каждые 30 сек.
+
+$updateScript = {
+    $temp = Get-RAIDTemperature
+    if ($temp) {
+        # Создаем новую иконку с температурой
+        $newIcon = Create-TemperatureIcon -tempText "$temp"
+        
+        # Заменяем иконку
+        $oldIcon = $icon.Icon
+        $icon.Icon = $newIcon
+        if ($oldIcon) { $oldIcon.Dispose() }
+        
+        # Обновляем подсказку
+        $icon.Text = "RAID Controller: $temp°C"
+    } else {
+        # Если ошибка, показываем "ERR"
+        $newIcon = Create-TemperatureIcon -tempText "ERR"
+        $oldIcon = $icon.Icon
+        $icon.Icon = $newIcon
+        if ($oldIcon) { $oldIcon.Dispose() }
+        $icon.Text = "RAID: Ошибка получения данных"
+    }
+}
+
+# Запускаем первое обновление.
+& $updateScript
+
+# Запускаем таймер.
+$timer.Add_Tick($updateScript)
+$timer.Start()
+
+# Запускаем цикл приложения.
+[System.Windows.Forms.Application]::Run()
