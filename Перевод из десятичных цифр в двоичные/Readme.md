@@ -23,11 +23,17 @@
 * Поддержка отрицательных дробных и целых чисел  
 * Перевод очень больших целых чисел без ограничения int64  
 
-Скрипт в версии 2: $intBinary = [Convert]::ToString([long]$integerPart, 2)  
+Скрипт в версии 2:  
+```
+$intBinary = [Convert]::ToString([long]$integerPart, 2)  
+```
+
 умел работать только с обычными целыми числами - int и long,  
 но не умел работать с числами типа decimal и BigInteger.  
+
 Скрипт в версии 3:  
 
+```
 	$tempInt = [decimal]$integerPart
         $intBinary = ""
 
@@ -40,6 +46,7 @@
                 $tempInt = [math]::Floor($tempInt / 2)
             }
         }
+```  
 
 Обеспечивает поддержку очень больших чисел и не зависит от int64.  
 В нём остаётся тот же decimal и, по сути, та же логика - деление на 2.  
@@ -49,7 +56,7 @@
 "102910920192090910920192091" в тип "System.Int64".  
 Ошибка: "Значение бы ло недопустимо малым или недопустимо большим для Int64."  
 строка:47 знак:9  
-+ $intBinary = [Convert]::ToString([long]$integerPart, 2)    
++ $intBinary = [Convert]::ToString([long]$integerPart, 2)  
 + CategoryInfo : InvalidArgument: (:) [], RuntimeException  
 + FullyQualifiedErrorId : InvalidCastIConvertible  
 
