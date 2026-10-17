@@ -1,4 +1,4 @@
-# Принудительно включаем кодировку UTF-8!
+# РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РІРєР»СЋС‡Р°РµРј РєРѕРґРёСЂРѕРІРєСѓ UTF-8!
 $Utf8 = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = $Utf8
 
@@ -7,7 +7,7 @@ try {
     [Console]::OutputEncoding = $Utf8
 } catch {}
 
-# История последних 100 введённых команд по команде history.
+# РСЃС‚РѕСЂРёСЏ РїРѕСЃР»РµРґРЅРёС… 100 РІРІРµРґС‘РЅРЅС‹С… РєРѕРјР°РЅРґ РїРѕ РєРѕРјР°РЅРґРµ history.
 $historyList = [System.Collections.Generic.List[string]]::new()
 
 function Add-HistoryEntry([string]$command) {
@@ -31,7 +31,7 @@ function Read-InputCommand([string]$prompt) {
             "history" {
                 Write-Host ""
                 if ($script:historyList.Count -eq 0) {
-                    Write-Host "История пуста."
+                    Write-Host "РСЃС‚РѕСЂРёСЏ РїСѓСЃС‚Р°."
                 }
                 else {
                     $start = [Math]::Max(0, $script:historyList.Count - 100)
@@ -49,10 +49,10 @@ function Read-InputCommand([string]$prompt) {
     }
 }
 
-# Основной цикл программы, крутится в while ($true)
+# РћСЃРЅРѕРІРЅРѕР№ С†РёРєР» РїСЂРѕРіСЂР°РјРјС‹, РєСЂСѓС‚РёС‚СЃСЏ РІ while ($true)
 while ($true) {
-    $ip = Read-InputCommand "Введите IP-адрес"
-    $maskInput = Read-InputCommand "Введите маску подсети (например, 28 или 255.255.255.240)"
+    $ip = Read-InputCommand "Р’РІРµРґРёС‚Рµ IP-Р°РґСЂРµСЃ"
+    $maskInput = Read-InputCommand "Р’РІРµРґРёС‚Рµ РјР°СЃРєСѓ РїРѕРґСЃРµС‚Рё (РЅР°РїСЂРёРјРµСЂ, 28 РёР»Рё 255.255.255.240)"
 
     try {
         $ipObj = [System.Net.IPAddress]::Parse($ip)
@@ -123,15 +123,15 @@ while ($true) {
 
         Write-Host ""
         Write-Host "IP:                  	         $ip"
-        Write-Host "Маска:               	         $maskText"
-        Write-Host "Сеть:                	         $netIP"
-        Write-Host "Первый доступный адрес шлюза:    $firstIP"
-        Write-Host "Последний доступный адрес шлюза: $lastIP"
+        Write-Host "РњР°СЃРєР°:               	         $maskText"
+        Write-Host "РЎРµС‚СЊ:                	         $netIP"
+        Write-Host "РџРµСЂРІС‹Р№ РґРѕСЃС‚СѓРїРЅС‹Р№ Р°РґСЂРµСЃ С€Р»СЋР·Р°:    $firstIP"
+        Write-Host "РџРѕСЃР»РµРґРЅРёР№ РґРѕСЃС‚СѓРїРЅС‹Р№ Р°РґСЂРµСЃ С€Р»СЋР·Р°: $lastIP"
         Write-Host ""
     }
     catch {
         Write-Host ""
-        Write-Host "Некорректный IP-адрес или маска."
+        Write-Host "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ IP-Р°РґСЂРµСЃ РёР»Рё РјР°СЃРєР°."
         Write-Host ""
     }
 }
