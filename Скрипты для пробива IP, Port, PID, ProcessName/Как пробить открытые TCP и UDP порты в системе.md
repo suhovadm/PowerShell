@@ -3,11 +3,15 @@
 
 // Прогнать все TCP-порты компьютера, которые находятся в состоянии LISTEN.  
 
+```
 Get-NetTCPConnection -State Listen |  
 Select-Object LocalAddress, LocalPort, OwningProcess, State  
+```
 
 // Показывает все локальные UDP-порты, которые используются приложениями и службами Windows.  
 
+```
 Get-NetUDPEndpoint |  
 Select-Object LocalAddress, LocalPort, OwningProcess,  
     @{Name='State'; Expression={'UDP Endpoint'}}  
+```
